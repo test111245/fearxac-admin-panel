@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FearXAC - Anti-Cheat Control Panel</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000000;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff0000 0%, #8b0000 100%);
+            position: relative;
+        }
+
+        .login-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 0, 0, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(139, 0, 0, 0.3) 0%, transparent 50%);
+        }
+
+        .login-form {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border: 2px solid #ff0000;
+            border-radius: 20px;
+            padding: 50px;
+            width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(255, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff0000, #ff6666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        }
+
+        .tagline {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 25px rgba(255, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff0000, #cc0000);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 0, 0, 0.4);
+        }
+
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: #000000;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .topbar {
+            background: linear-gradient(135deg, #1a0000 0%, #330000 100%);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #ff0000;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(255, 0, 0, 0.2);
+        }
+
+        .topbar .logo-small {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff0000, #ff6666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 25px;
+            border: 1px solid #00ff00;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+        }
+
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 84px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: linear-gradient(180deg, #1a0000 0%, #2d0000 100%);
+            border-right: 2px solid #ff0000;
+            padding: 30px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 18px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 0, 0, 0.1);
+            border-left-color: #ff0000;
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 0, 0, 0.2);
+            border-left-color: #ff0000;
+            color: #ff6666;
+        }
+
+        .nav-item .icon {
+            font-size: 20px;
+            width: 25px;
+            text-align: center;
+        }
+
+        .content {
+            flex: 1;
+            padding: 40px;
+            background: #0a0a0a;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1a0000 0%, #2d0000 100%);
+            border: 2px solid #ff0000;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 0, 0, 0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ff0000, #ff6666);
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff0000, #ff6666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1a0000 0%, #2d0000 100%);
+            border: 2px solid #ff0000;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(255, 0, 0, 0.2);
+        }
+
+        .card-header {
+            background: rgba(255, 0, 0, 0.1);
+            padding: 25px;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.3);
+            font-size: 20px;
+            font-weight: 600;
+            color: #ff6666;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .threat-level {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .threat-low { 
+            background: rgba(0, 255, 0, 0.2); 
+            color: #00ff00; 
+            border: 1px solid #00ff00;
+        }
+
+        .threat-medium { 
+            background: rgba(255, 255, 0, 0.2); 
+            color: #ffff00; 
+            border: 1px solid #ffff00;
+        }
+
+        .threat-high { 
+            background: rgba(255, 165, 0, 0.2); 
+            color: #ffa500; 
+            border: 1px solid #ffa500;
+        }
+
+        .threat-critical { 
+            background: rgba(255, 0, 0, 0.2); 
+            color: #ff0000; 
+            border: 1px solid #ff0000;
+        }
+
+        .live-logs {
+            background: #000000;
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+            padding: 25px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.1);
+            display: flex;
+            gap: 20px;
+        }
+
+        .log-time {
+            color: #ff6666;
+            min-width: 90px;
+            font-weight: bold;
+        }
+
+        .log-type {
+            min-width: 80px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .log-type.detection { color: #ff0000; }
+        .log-type.ban { color: #ff4444; }
+        .log-type.kick { color: #ffaa00; }
+        .log-type.warning { color: #ffff00; }
+        .log-type.info { color: #66ff66; }
+
+        .log-message {
+            flex: 1;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .data-table th {
+            background: rgba(255, 0, 0, 0.1);
+            color: #ff6666;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 0, 0, 0.05);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff0000, #cc0000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 0, 0, 0.4);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+        }
+
+        .btn.success {
+            background: linear-gradient(45deg, #00aa00, #008800);
+        }
+
+        .btn.warning {
+            background: linear-gradient(45deg, #ffaa00, #cc8800);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            flex: 1;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 0, 0, 0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .detection-alert {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border: 2px solid #ff4444;
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            z-index: 1000;
+            display: none;
+            animation: slideInRight 0.5s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .detection-type {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .detection-details {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .fearxac-brand {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(139, 0, 0, 0.1));
+            border-radius: 15px;
+            border: 1px solid rgba(255, 0, 0, 0.2);
+        }
+
+        .fearxac-brand h1 {
+            font-size: 32px;
+            background: linear-gradient(45deg, #ff0000, #ff6666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .fearxac-brand p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a0000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff0000;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff3333;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+                padding: 15px 0;
+            }
+            
+            .content {
+                order: 1;
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .login-form {
+                width: 90%;
+                padding: 30px;
+            }
+            
+            .topbar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .user-section {
+                gap: 15px;
+            }
+            
+            .nav-item {
+                padding: 15px 20px;
+            }
+            
+            .detection-alert {
+                right: 15px;
+                left: 15px;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+            
+            .data-table {
+                font-size: 12px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <form class="login-form" id="loginForm">
+            <div class="logo">🛡️ FearXAC</div>
+            <div class="tagline">Advanced Anti-Cheat Control Panel</div>
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="username" required placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="login-btn">Access Control Panel</button>
+        </form>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="topbar">
+            <div class="logo-small">🛡️ FearXAC Control Panel</div>
+            <div class="user-section">
+                <div class="server-status">
+                    <div class="status-dot"></div>
+                    <span>Protection Active</span>
+                </div>
+                <span id="currentUser">Administrator</span>
+                <button class="btn" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <div class="sidebar">
+                <div class="nav-item active" onclick="showPage('overview')">
+                    <span class="icon">📊</span>
+                    <span>Threat Overview</span>
+                </div>
+                <div class="nav-item" onclick="showPage('detections')">
+                    <span class="icon">🚨</span>
+                    <span>Live Detections</span>
+                </div>
+                <div class="nav-item" onclick="showPage('players')">
+                    <span class="icon">👥</span>
+                    <span>Player Monitor</span>
+                </div>
+                <div class="nav-item" onclick="showPage('bans')">
+                    <span class="icon">🔒</span>
+                    <span>Ban System</span>
+                </div>
+                <div class="nav-item" onclick="showPage('config')">
+                    <span class="icon">⚙️</span>
+                    <span>Protection Config</span>
+                </div>
+                <div class="nav-item" onclick="showPage('analytics')">
+                    <span class="icon">📈</span>
+                    <span>Threat Analytics</span>
+                </div>
+                <div class="nav-item" onclick="showPage('logs')">
+                    <span class="icon">📜</span>
+                    <span>Security Logs</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Overview Page -->
+                <div class="page active" id="overview">
+                    <div class="fearxac-brand">
+                        <h1>FearXAC Protection System</h1>
+                        <p>Advanced threat detection and prevention for your FiveM server</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="threatsBlocked">1,247</div>
+                            <div class="stat-label">Threats Blocked Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="playersProtected">64</div>
+                            <div class="stat-label">Players Protected</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="detectionAccuracy">99.8%</div>
+                            <div class="stat-label">Detection Accuracy</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="uptimeStats">100%</div>
+                            <div class="stat-label">System Uptime</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">🎯 Recent Threat Activity</div>
+                        <div class="card-body">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Threat Level</th>
+                                        <th>Player</th>
+                                        <th>Detection</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="threatActivity">
+                                    <tr>
+                                        <td>16:42:33</td>
+                                        <td><span class="threat-level threat-critical">Critical</span></td>
+                                        <td>Cheater123</td>
+                                        <td>Speed Hack + Godmode</td>
+                                        <td><span class="btn danger">Banned</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>16:41:15</td>
+                                        <td><span class="threat-level threat-high">High</span></td>
+                                        <td>SuspiciousPlayer</td>
+                                        <td>Teleportation</td>
+                                        <td><span class="btn warning">Kicked</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>16:40:02</td>
+                                        <td><span class="threat-level threat-medium">Medium</span></td>
+                                        <td>PlayerABC</td>
+                                        <td>Weapon Spawn</td>
+                                        <td><span class="btn warning">Warning</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Detections Page -->
+                <div class="page" id="detections">
+                    <div class="card">
+                        <div class="card-header">🚨 Live Threat Detection System</div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value">23</div>
+                                    <div class="stat-label">Speed Hacks</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">15</div>
+                                    <div class="stat-label">Godmode</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">8</div>
+                                    <div class="stat-label">Teleport Hacks</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">12</div>
+                                    <div class="stat-label">Weapon Hacks</div>
+                                </div>
+                            </div>
+
+                            <div class="live-logs" id="liveDetections">
+                                <div class="log-entry">
+                                    <span class="log-time">16:42:33</span>
+                                    <span class="log-type detection">CRITICAL</span>
+                                    <span class="log-message">[FEARXAC] Player 'Cheater123' detected: Speed hack (450% above normal) + Godmode - AUTO BANNED</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="log-time">16:42:15</span>
+                                    <span class="log-type ban">BAN</span>
+                                    <span class="log-message">[FEARXAC] Player 'SuspiciousPlayer' teleported 2000m instantly - BANNED</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="log-time">16:41:58</span>
+                                    <span class="log-type kick">KICK</span>
+                                    <span class="log-message">[FEARXAC] Player 'BadActor' spawned restricted weapon 'WEAPON_RAILGUN' - KICKED</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="log-time">16:41:23</span>
+                                    <span class="log-type warning">WARNING</span>
+                                    <span class="log-message">[FEARXAC] Player 'PlayerABC' suspicious movement pattern detected - FLAGGED</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players Page -->
+                <div class="page" id="players">
+                    <div class="card">
+                        <div class="card-header">👥 Player Monitoring System</div>
+                        <div class="card-body">
+                            <div class="search-container">
+                                <input type="text" class="search-box" placeholder="Search players..." id="playerSearch">
+                                <button class="btn" onclick="refreshPlayers()">Refresh</button>
+                                <button class="btn warning" onclick="scanAllPlayers()">Scan All</button>
+                            </div>
+
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Player Name</th>
+                                        <th>Threat Level</th>
+                                        <th>Violations</th>
+                                        <th>Join Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="playersTable">
+                                    <tr>
+                                        <td>1</td>
+                                        <td>LegitPlayer123</td>
+                                        <td><span class="threat-level threat-low">Clean</span></td>
+                                        <td>0</td>
+                                        <td>2h 34m ago</td>
+                                        <td>
+                                            <button class="btn" onclick="scanPlayer(1)">Scan</button>
+                                            <button class="btn warning" onclick="kickPlayer(1)">Kick</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>SuspiciousUser</td>
+                                        <td><span class="threat-level threat-medium">Flagged</span></td>
+                                        <td>3</td>
+                                        <td>45m ago</td>
+                                        <td>
+                                            <button class="btn" onclick="scanPlayer(2)">Scan</button>
+                                            <button class="btn warning" onclick="kickPlayer(2)">Kick</button>
+                                            <button class="btn danger" onclick="banPlayer(2)">Ban</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bans Page -->
+                <div class="page" id="bans">
+                    <div class="card">
+                        <div class="card-header">🔒 FearXAC Ban Database</div>
+                        <div class="card-body">
+                            <div class="search-container">
+                                <input type="text" class="search-box" placeholder="Search bans..." id="banSearch">
+                                <button class="btn success" onclick="addBan()">Manual Ban</button>
+                                <button class="btn" onclick="refreshBans()">Refresh</button>
+                            </div>
+
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Violation Type</th>
+                                        <th>Detection Details</th>
+                                        <th>Ban Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bansTable">
+                                    <tr>
+                                        <td>Cheater123</td>
+                                        <td>Speed + Godmode</td>
+                                        <td>450% speed increase, invincibility detected</td>
+                                        <td>Aug 4, 2025</td>
+                                        <td><span class="threat-level threat-critical">Permanent</span></td>
+                                        <td>
+                                            <button class="btn success" onclick="appealBan('steam:123')">Review</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>TeleportHacker</td>
+                                        <td>Teleportation</td>
+                                        <td>Instant 2000m teleportation</td>
+                                        <td>Aug 4, 2025</td>
+                                        <td><span class="threat-level threat-high">7 Days</span></td>
+                                        <td>
+                                            <button class="btn success" onclick="unbanPlayer('steam:456')">Unban</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Page -->
+                <div class="page" id="config">
+                    <div class="card">
+                        <div class="card-header">⚙️ FearXAC Protection Configuration</div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <h3 style="color: #ff6666; margin-bottom: 15px;">Detection Settings</h3>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span>Speed Hack Detection</span>
+                                        <button class="btn success" onclick="toggleProtection('speed')">ENABLED</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span>Godmode Detection</span>
+                                        <button class="btn success" onclick="toggleProtection('godmode')">ENABLED</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span>Teleport Detection</span>
+                                        <button class="btn success" onclick="toggleProtection('teleport')">ENABLED</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span>Weapon Hack Detection</span>
+                                        <button class="btn success" onclick="toggleProtection('weapon')">ENABLED</button>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card">
+                                    <h3 style="color: #ff6666; margin-bottom: 15px;">Action Settings</h3>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span>Auto-Ban Cheaters</span>
+                                        <button class="btn success" onclick="toggleAction('autoban')">ENABLED</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span>Instant Punishment</span>
+                                        <button class="btn success" onclick="toggleAction('instant')">ENABLED</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                        <span>Discord Notifications</span>
+                                        <button class="btn warning" onclick="toggleAction('discord')">DISABLED</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span>Log All Events</span>
+                                        <button class="btn success" onclick="toggleAction('logging')">ENABLED</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn success" style="font-size: 16px; padding: 15px 30px;" onclick="saveConfig()">💾 Save Configuration</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Page -->
+                <div class="page" id="analytics">
+                    <div class="card">
+                        <div class="card-header">📈 FearXAC Threat Analytics</div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value">99.8%</div>
+                                    <div class="stat-label">Detection Accuracy</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">0.2s</div>
+                                    <div class="stat-label">Avg Detection Time</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">4,293</div>
+                                    <div class="stat-label">Total Threats Blocked</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">2</div>
+                                    <div class="stat-label">False Positives</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logs Page -->
+                <div class="page" id="logs">
+                    <div class="card">
+                        <div class="card-header">📜 FearXAC Security Logs</div>
+                        <div class="card-body">
+                            <div class="search-container">
+                                <input type="text" class="search-box" placeholder="Search logs..." id="logSearch">
+                                <button class="btn" onclick="clearLogs()">Clear</button>
+                                <button class="btn success" onclick="exportLogs()">Export</button>
+                            </div>
+
+                            <div class="live-logs" id="securityLogs">
+                                <div class="log-entry">
+                                    <span class="log-time">16:42:33</span>
+                                    <span class="log-type detection">DETECTION</span>
+                                    <span class="log-message">[FEARXAC] Critical threat detected - Speed hack + Godmode - Player banned</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="log-time">16:42:15</span>
+                                    <span class="log-type ban">BAN</span>
+                                    <span class="log-message">[FEARXAC] Auto-ban executed - Teleportation hack detected</span>
+                                </div>
+                                <div class="log-entry">
+                                    <span class="log-time">16:41:58</span>
+                                    <span class="log-type info">INFO</span>
+                                    <span class="log-message">[FEARXAC] System scan completed - 64 players checked, 0 threats found</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detection Alert -->
+    <div class="detection-alert" id="detectionAlert">
+        <div class="detection-type" id="alertType">CRITICAL THREAT DETECTED</div>
+        <div class="detection-details" id="alertDetails">Speed hack detected - Auto-ban initiated</div>
+    </div>
+
+    <script>
+        // FearXAC Admin Panel JavaScript
+        let currentPage = 'overview';
+        let isLoggedIn = false;
+        let refreshInterval;
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Demo credentials for FearXAC
+            if (username === 'admin' && password === 'fearxac2025') {
+                login(username);
+            } else {
+                alert('Access Denied! Invalid credentials for FearXAC system.');
+            }
+        });
+
+        function login(username) {
+            isLoggedIn = true;
+            document.getElementById('currentUser').textContent = username;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            
+            startThreatMonitoring();
+            showDetectionAlert('SUCCESS', 'FearXAC system access granted - Protection systems online');
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').classList.remove('active');
+            clearInterval(refreshInterval);
+            
+            // Clear form
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName).classList.add('active');
+            
+            // Add active class to clicked nav item
+            event.target.closest('.nav-item').classList.add('active');
+            
+            currentPage = pageName;
+        }
+
+        function startThreatMonitoring() {
+            refreshInterval = setInterval(() => {
+                if (isLoggedIn) {
+                    updateThreatStats();
+                    if (Math.random() < 0.3) { // 30% chance of new detection
+                        simulateDetection();
+                    }
+                }
+            }, 5000);
+        }
+
+        function updateThreatStats() {
+            const threatsBlocked = Math.floor(Math.random() * 50) + 1200;
+            const playersProtected = Math.floor(Math.random() * 20) + 50;
+            
+            if (document.getElementById('threatsBlocked')) {
+                document.getElementById('threatsBlocked').textContent = threatsBlocked.toLocaleString();
+            }
+            if (document.getElementById('playersProtected')) {
+                document.getElementById('playersProtected').textContent = playersProtected;
+            }
+        }
+
+        function simulateDetection() {
+            const detectionTypes = [
+                { type: 'CRITICAL', details: 'Speed hack + Godmode detected - Auto-ban initiated', player: 'Cheater' + Math.floor(Math.random() * 999) },
+                { type: 'HIGH', details: 'Teleportation hack detected - Player kicked', player: 'SuspiciousUser' + Math.floor(Math.random() * 999) },
+                { type: 'MEDIUM', details: 'Weapon spawn violation - Warning issued', player: 'Player' + Math.floor(Math.random() * 999) },
+                { type: 'LOW', details: 'Suspicious movement pattern detected', player: 'User' + Math.floor(Math.random() * 999) }
+            ];
+            
+            const detection = detectionTypes[Math.floor(Math.random() * detectionTypes.length)];
+            showDetectionAlert(detection.type, `${detection.player}: ${detection.details}`);
+            
+            // Add to live logs
+            if (currentPage === 'detections') {
+                addDetectionLog(detection);
+            }
+            
+            // Add to threat activity table
+            addThreatActivity(detection);
+        }
+
+        function showDetectionAlert(type, details) {
+            const alertPanel = document.getElementById('detectionAlert');
+            const alertType = document.getElementById('alertType');
+            const alertDetails = document.getElementById('alertDetails');
+            
+            alertType.textContent = `${type} THREAT DETECTED`;
+            alertDetails.textContent = details;
+            alertPanel.style.display = 'block';
+            
+            setTimeout(() => {
+                alertPanel.style.display = 'none';
+            }, 5000);
+        }
+
+        function addDetectionLog(detection) {
+            const logsContainer = document.getElementById('liveDetections');
+            if (!logsContainer) return;
+            
+            const time = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-type detection">${detection.type}</span>
+                <span class="log-message">[FEARXAC] ${detection.details}</span>
+            `;
+            
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+            
+            // Keep only last 20 logs
+            while (logsContainer.children.length > 20) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+        }
+
+        function addThreatActivity(detection) {
+            const threatTable = document.getElementById('threatActivity');
+            if (!threatTable) return;
+            
+            const time = new Date().toLocaleTimeString();
+            const threatLevels = {
+                'CRITICAL': 'threat-critical',
+                'HIGH': 'threat-high',
+                'MEDIUM': 'threat-medium',
+                'LOW': 'threat-low'
+            };
+            
+            const actions = {
+                'CRITICAL': 'Banned',
+                'HIGH': 'Kicked',
+                'MEDIUM': 'Warning',
+                'LOW': 'Flagged'
+            };
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${time}</td>
+                <td><span class="threat-level ${threatLevels[detection.type]}">${detection.type}</span></td>
+                <td>${detection.player}</td>
+                <td>${detection.details.split(' - ')[0]}</td>
+                <td><span class="btn ${detection.type === 'CRITICAL' ? 'danger' : 'warning'}">${actions[detection.type]}</span></td>
+            `;
+            
+            threatTable.insertBefore(row, threatTable.firstChild);
+            
+            // Keep only last 10 entries
+            while (threatTable.children.length > 10) {
+                threatTable.removeChild(threatTable.lastChild);
+            }
+        }
+
+        // Action functions
+        function scanPlayer(playerId) {
+            showDetectionAlert('INFO', `Scanning player ${playerId} - Deep scan completed, no threats found`);
+        }
+
+        function kickPlayer(playerId) {
+            if (confirm('Are you sure you want to kick this player?')) {
+                showDetectionAlert('ACTION', `Player ${playerId} has been kicked by FearXAC system`);
+                
+                // Update player table
+                const row = event.target.closest('tr');
+                if (row) {
+                    row.style.opacity = '0.5';
+                    row.querySelector('.threat-level').textContent = 'Kicked';
+                    row.querySelector('.threat-level').className = 'threat-level threat-high';
+                }
+            }
+        }
+
+        function banPlayer(playerId) {
+            if (confirm('Are you sure you want to permanently ban this player?')) {
+                showDetectionAlert('ACTION', `Player ${playerId} has been permanently banned by FearXAC`);
+                
+                // Update player table
+                const row = event.target.closest('tr');
+                if (row) {
+                    row.style.opacity = '0.3';
+                    row.querySelector('.threat-level').textContent = 'Banned';
+                    row.querySelector('.threat-level').className = 'threat-level threat-critical';
+                }
+            }
+        }
+
+        function toggleProtection(type) {
+            const button = event.target;
+            const isEnabled = button.textContent === 'ENABLED';
+            
+            if (isEnabled) {
+                button.textContent = 'DISABLED';
+                button.className = 'btn warning';
+                showDetectionAlert('CONFIG', `${type.toUpperCase()} protection disabled - Server vulnerability increased`);
+            } else {
+                button.textContent = 'ENABLED';
+                button.className = 'btn success';
+                showDetectionAlert('CONFIG', `${type.toUpperCase()} protection enabled - Server security enhanced`);
+            }
+        }
+
+        function toggleAction(type) {
+            const button = event.target;
+            const isEnabled = button.textContent === 'ENABLED';
+            
+            if (isEnabled) {
+                button.textContent = 'DISABLED';
+                button.className = 'btn warning';
+                showDetectionAlert('CONFIG', `${type.toUpperCase()} action disabled`);
+            } else {
+                button.textContent = 'ENABLED';
+                button.className = 'btn success';
+                showDetectionAlert('CONFIG', `${type.toUpperCase()} action enabled`);
+            }
+        }
+
+        function saveConfig() {
+            showDetectionAlert('SUCCESS', 'FearXAC configuration saved successfully - All protection systems updated');
+        }
+
+        function scanAllPlayers() {
+            showDetectionAlert('INFO', 'Full server scan initiated - Scanning all 64 players for threats...');
+            
+            setTimeout(() => {
+                const threatsFound = Math.floor(Math.random() * 3);
+                if (threatsFound > 0) {
+                    showDetectionAlert('WARNING', `Server scan complete - ${threatsFound} potential threats detected and flagged`);
+                } else {
+                    showDetectionAlert('SUCCESS', 'Server scan complete - No threats detected, all players clean');
+                }
+            }, 3000);
+        }
+
+        function refreshPlayers() {
+            showDetectionAlert('INFO', 'Player list refreshed - Real-time data synchronized');
+            
+            // Simulate player list update
+            const playerCount = Math.floor(Math.random() * 30) + 40;
+            if (document.getElementById('playersProtected')) {
+                document.getElementById('playersProtected').textContent = playerCount;
+            }
+        }
+
+        function refreshBans() {
+            showDetectionAlert('INFO', 'Ban database refreshed - All active bans synchronized');
+        }
+
+        function addBan() {
+            const playerName = prompt('Enter player name to ban:');
+            const reason = prompt('Enter ban reason:');
+            
+            if (playerName && reason) {
+                showDetectionAlert('SUCCESS', `Manual ban added for ${playerName} - Reason: ${reason}`);
+                
+                // Add to bans table
+                const bansTable = document.getElementById('bansTable');
+                if (bansTable) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${playerName}</td>
+                        <td>Manual Ban</td>
+                        <td>${reason}</td>
+                        <td>${new Date().toLocaleDateString()}</td>
+                        <td><span class="threat-level threat-critical">Permanent</span></td>
+                        <td>
+                            <button class="btn success" onclick="unbanPlayer('manual:${playerName}')">Unban</button>
+                        </td>
+                    `;
+                    bansTable.insertBefore(row, bansTable.firstChild);
+                }
+            }
+        }
+
+        function unbanPlayer(steamId) {
+            if (confirm('Are you sure you want to unban this player?')) {
+                showDetectionAlert('SUCCESS', 'Player unbanned successfully - Access restored');
+                
+                // Remove from table
+                const row = event.target.closest('tr');
+                if (row) {
+                    row.style.opacity = '0.3';
+                    setTimeout(() => {
+                        row.remove();
+                    }, 1000);
+                }
+            }
+        }
+
+        function appealBan(steamId) {
+            showDetectionAlert('INFO', 'Ban review initiated - Case flagged for manual review');
+        }
+
+        function clearLogs() {
+            if (confirm('Clear all security logs? This action cannot be undone.')) {
+                const containers = ['securityLogs', 'liveDetections'];
+                containers.forEach(id => {
+                    const container = document.getElementById(id);
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="log-entry">
+                                <span class="log-time">${new Date().toLocaleTimeString()}</span>
+                                <span class="log-type info">INFO</span>
+                                <span class="log-message">[FEARXAC] Security logs cleared by administrator</span>
+                            </div>
+                        `;
+                    }
+                });
+                showDetectionAlert('INFO', 'Security logs cleared successfully');
+            }
+        }
+
+        function exportLogs() {
+            showDetectionAlert('SUCCESS', 'Security logs exported successfully - File saved to downloads');
+            
+            // Simulate file download
+            const logData = "FearXAC Security Log Export\n" +
+                           "Generated: " + new Date().toISOString() + "\n" +
+                           "=================================\n" +
+                           "Sample log entries would be here...";
+            
+            const blob = new Blob([logData], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'fearxac_logs_' + new Date().toISOString().slice(0, 10) + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case '1':
+                        event.preventDefault();
+                        showPage('overview');
+                        break;
+                    case '2':
+                        event.preventDefault();
+                        showPage('detections');
+                        break;
+                    case '3':
+                        event.preventDefault();
+                        showPage('players');
+                        break;
+                    case '4':
+                        event.preventDefault();
+                        showPage('bans');
+                        break;
+                    case '5':
+                        event.preventDefault();
+                        showPage('config');
+                        break;
+                    case 'l':
+                        event.preventDefault();
+                        if (isLoggedIn) {
+                            logout();
+                        }
+                        break;
+                }
+            }
+            
+            // ESC key to close alerts
+            if (event.key === 'Escape') {
+                const alert = document.getElementById('detectionAlert');
+                if (alert && alert.style.display === 'block') {
+                    alert.style.display = 'none';
+                }
+            }
+        });
+
+        // Add some demo data on page load
+        function initializeDemoData() {
+            // Add some initial threat activity
+            const initialThreats = [
+                { type: 'CRITICAL', details: 'Speed hack + Godmode detected', player: 'Cheater123' },
+                { type: 'HIGH', details: 'Teleportation hack detected', player: 'SuspiciousPlayer' },
+                { type: 'MEDIUM', details: 'Weapon spawn violation', player: 'PlayerABC' }
+            ];
+            
+            initialThreats.forEach(threat => {
+                addThreatActivity(threat);
+            });
+        }
+
+        // Initialize demo data when page loads
+        window.addEventListener('load', function() {
+            setTimeout(initializeDemoData, 1000);
+        });
+
+        // Prevent right-click context menu for security
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Auto-logout after inactivity (30 minutes)
+        let inactivityTimer;
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            if (isLoggedIn) {
+                inactivityTimer = setTimeout(() => {
+                    showDetectionAlert('SECURITY', 'Session expired due to inactivity - Logging out for security');
+                    setTimeout(logout, 2000);
+                }, 30 * 60 * 1000); // 30 minutes
+            }
+        }
+
+        // Reset timer on user activity
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, true);
+        });
+
+        console.log('🛡️ FearXAC Admin Panel Loaded - System Ready');
+    </script>
+</body>
+</html>
